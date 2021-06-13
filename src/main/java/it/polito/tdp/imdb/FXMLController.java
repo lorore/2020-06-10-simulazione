@@ -5,8 +5,11 @@
 package it.polito.tdp.imdb;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.imdb.model.Actor;
 import it.polito.tdp.imdb.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,10 +38,10 @@ public class FXMLController {
     private Button btnSimulazione; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxGenere"
-    private ComboBox<?> boxGenere; // Value injected by FXMLLoader
+    private ComboBox<String> boxGenere; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxAttore"
-    private ComboBox<?> boxAttore; // Value injected by FXMLLoader
+    private ComboBox<Actor> boxAttore; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtGiorni"
     private TextField txtGiorni; // Value injected by FXMLLoader
@@ -48,11 +51,33 @@ public class FXMLController {
 
     @FXML
     void doAttoriSimili(ActionEvent event) {
-
+    	this.txtResult.clear();
+    	Actor a=this.boxAttore.getValue();
+    	if(a==null) {
+    		this.txtResult.setText("Errore, nessun attore inserito");
+    		return;
+    	}
+    	List<Actor> result=this.model.attoriRaggiungibili(a);
+    	Collections.sort(result);
+    	for(Actor s: result) {
+    		this.txtResult.appendText(s +"\n");
+    	}
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	this.txtResult.clear();
+    	String g=this.boxGenere.getValue();
+    	if(g.isEmpty()) {
+    		this.txtResult.setText("Nessun genere inserito");
+    		return;
+    	}
+    	String result=this.model.creaGrafo(g);
+    	this.txtResult.setText(result);
+    	this.boxAttore.getItems().clear();
+    	this.boxAttore.getItems().addAll(this.model.getAttori());
+    	this.btnSimili.setDisable(false);
+    	this.btnSimulazione.setDisable(false);
 
     }
 
@@ -75,5 +100,8 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.boxGenere.getItems().addAll(this.model.getGeneri());
+    	this.btnSimili.setDisable(true);
+    	this.btnSimulazione.setDisable(true);
     }
 }
